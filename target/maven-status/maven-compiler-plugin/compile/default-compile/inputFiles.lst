@@ -1,0 +1,12 @@
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\controller\TaskController.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\entity\Task.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\enums\TaskPriority.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\enums\TaskStatus.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\exception\ApiError.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\exception\GlobalExceptionHandler.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\exception\InvalidTaskException.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\exception\ResourceNotFoundException.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\repository\TaskRepository.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\service\TaskService.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\service\TaskServiceImpl.java
+C:\Users\sergi\Desktop\Uni\Master\PracticasContinuas\Boletines\Boletín1\src\main\java\com\example\taskmanager\TaskManagerApplication.java
