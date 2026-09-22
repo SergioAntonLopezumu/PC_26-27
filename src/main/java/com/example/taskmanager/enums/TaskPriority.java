@@ -1,8 +1,8 @@
 package com.example.taskmanager.enums;
 
 public enum TaskPriority {
-    LOW,
-    MEDIUM,
-    HIGH,
-    URGENT
+  LOW,
+  MEDIUM,
+  HIGH,
+  URGENT
 }
