@@ -1,1 +1,4 @@
- "target/\n*.class\n.idea/\n.env\n" 
+target/
+*.class
+.idea/
+.env
