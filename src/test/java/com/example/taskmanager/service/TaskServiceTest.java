@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.example.taskmanager.dto.TaskPageResponse;
 import com.example.taskmanager.entity.Task;
 import com.example.taskmanager.enums.TaskPriority;
 import com.example.taskmanager.enums.TaskStatus;
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
@@ -42,24 +45,56 @@ class TaskServiceTest {
 
   @Test
   void getAllTasks_shouldReturnAllTasksWhenStatusIsNull() {
-    when(taskRepository.findAll()).thenReturn(List.of(validTask));
+    when(taskRepository.findAll(PageRequest.of(0, 10)))
+        .thenReturn(new PageImpl<>(List.of(validTask), PageRequest.of(0, 10), 1));
 
-    List<Task> tasks = taskService.getAllTasks(null);
+    TaskPageResponse response = taskService.getAllTasks(null, 0, 10);
 
-    assertEquals(List.of(validTask), tasks);
-    verify(taskRepository).findAll();
-    verify(taskRepository, never()).findByStatus(any());
+    assertEquals(List.of(validTask), response.content());
+    assertEquals(1, response.totalElements());
+    assertEquals(1, response.totalPages());
+    verify(taskRepository).findAll(PageRequest.of(0, 10));
+    verify(taskRepository, never()).findByStatus(any(), any());
   }
 
   @Test
   void getAllTasks_shouldFilterByStatusWhenProvided() {
-    when(taskRepository.findByStatus(TaskStatus.COMPLETED)).thenReturn(List.of(validTask));
+    when(taskRepository.findByStatus(TaskStatus.COMPLETED, PageRequest.of(1, 10)))
+        .thenReturn(new PageImpl<>(List.of(validTask), PageRequest.of(1, 10), 11));
 
-    List<Task> tasks = taskService.getAllTasks(TaskStatus.COMPLETED);
+    TaskPageResponse response = taskService.getAllTasks(TaskStatus.COMPLETED, 1, 10);
 
-    assertEquals(List.of(validTask), tasks);
-    verify(taskRepository).findByStatus(TaskStatus.COMPLETED);
-    verify(taskRepository, never()).findAll();
+    assertEquals(List.of(validTask), response.content());
+    assertEquals(11, response.totalElements());
+    assertEquals(2, response.totalPages());
+    verify(taskRepository).findByStatus(TaskStatus.COMPLETED, PageRequest.of(1, 10));
+    verify(taskRepository, never()).findAll(any(PageRequest.class));
+  }
+
+  @Test
+  void getAllTasks_shouldRejectInvalidPagination() {
+    InvalidTaskException negativePage =
+        assertThrows(InvalidTaskException.class, () -> taskService.getAllTasks(null, -1, 10));
+    assertEquals("El parámetro page no puede ser negativo.", negativePage.getMessage());
+
+    InvalidTaskException invalidSize =
+        assertThrows(InvalidTaskException.class, () -> taskService.getAllTasks(null, 0, -1));
+    assertEquals("El parámetro size debe ser mayor que 0.", invalidSize.getMessage());
+
+    assertThrows(InvalidTaskException.class, () -> taskService.getAllTasks(null, 0, 0));
+    verifyNoInteractions(taskRepository);
+  }
+
+  @Test
+  void getAllTasks_shouldReturnEmptyContentWhenPageIsOutOfRange() {
+    when(taskRepository.findAll(PageRequest.of(2, 10)))
+        .thenReturn(new PageImpl<>(List.of(), PageRequest.of(2, 10), 1));
+
+    TaskPageResponse response = taskService.getAllTasks(null, 2, 10);
+
+    assertTrue(response.content().isEmpty());
+    assertEquals(1, response.totalElements());
+    assertEquals(1, response.totalPages());
   }
 
   @Test

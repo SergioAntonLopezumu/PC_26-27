@@ -1,10 +1,10 @@
 package com.example.taskmanager.controller;
 
+import com.example.taskmanager.dto.TaskPageResponse;
 import com.example.taskmanager.entity.Task;
 import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +20,11 @@ public class TaskController {
   }
 
   @GetMapping("/tasks")
-  public List<Task> getAllTasks(@RequestParam(required = false) TaskStatus status) {
-    return taskService.getAllTasks(status);
+  public TaskPageResponse getAllTasks(
+      @RequestParam(required = false) TaskStatus status,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    return taskService.getAllTasks(status, page, size);
   }
 
   @GetMapping("/tasks/{id}")
