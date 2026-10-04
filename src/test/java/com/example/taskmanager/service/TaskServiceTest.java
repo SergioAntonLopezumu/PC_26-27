@@ -11,6 +11,7 @@ import com.example.taskmanager.exception.InvalidTaskException;
 import com.example.taskmanager.exception.ResourceNotFoundException;
 import com.example.taskmanager.repository.TaskRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,28 @@ class TaskServiceTest {
     validTask.setStatus(TaskStatus.PENDING);
     validTask.setPriority(TaskPriority.HIGH);
     validTask.setDueDate(LocalDate.now().plusDays(3));
+  }
+
+  @Test
+  void getAllTasks_shouldReturnAllTasksWhenStatusIsNull() {
+    when(taskRepository.findAll()).thenReturn(List.of(validTask));
+
+    List<Task> tasks = taskService.getAllTasks(null);
+
+    assertEquals(List.of(validTask), tasks);
+    verify(taskRepository).findAll();
+    verify(taskRepository, never()).findByStatus(any());
+  }
+
+  @Test
+  void getAllTasks_shouldFilterByStatusWhenProvided() {
+    when(taskRepository.findByStatus(TaskStatus.COMPLETED)).thenReturn(List.of(validTask));
+
+    List<Task> tasks = taskService.getAllTasks(TaskStatus.COMPLETED);
+
+    assertEquals(List.of(validTask), tasks);
+    verify(taskRepository).findByStatus(TaskStatus.COMPLETED);
+    verify(taskRepository, never()).findAll();
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 
 import com.example.taskmanager.entity.Task;
+import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -19,8 +20,8 @@ public class TaskController {
   }
 
   @GetMapping("/tasks")
-  public List<Task> getAllTasks() {
-    return taskService.getAllTasks();
+  public List<Task> getAllTasks(@RequestParam(required = false) TaskStatus status) {
+    return taskService.getAllTasks(status);
   }
 
   @GetMapping("/tasks/{id}")
