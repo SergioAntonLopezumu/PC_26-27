@@ -81,7 +81,7 @@ Base URL:
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/api/tasks` | Devuelve todas las tareas; admite el filtro opcional `?status=PENDING`, `?status=IN_PROGRESS` o `?status=COMPLETED` |
+| GET | `/api/tasks` | Lista tareas paginadas; admite `?page=0&size=10` y el filtro opcional `?status=PENDING`, `?status=IN_PROGRESS` o `?status=COMPLETED` |
 | GET | `/api/tasks/{id}` | Devuelve una tarea por su identificador |
 | POST | `/api/tasks` | Crea una nueva tarea |
 | PUT | `/api/tasks/{id}` | Actualiza una tarea existente |
@@ -105,6 +105,14 @@ curl -X POST http://localhost:8080/api/tasks \
 
 ```bash
 curl http://localhost:8080/api/tasks
+```
+
+El listado usa `page=0` y `size=10` por defecto. La respuesta contiene las tareas en
+`content`, el total de elementos en `totalElements` y el total de páginas en
+`totalPages`. Por ejemplo:
+
+```bash
+curl "http://localhost:8080/api/tasks?page=0&size=10"
 ```
 
 Para listar únicamente las tareas en un estado:

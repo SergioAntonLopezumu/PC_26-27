@@ -1,12 +1,15 @@
 package com.example.taskmanager.service;
 
+import com.example.taskmanager.dto.TaskPageResponse;
 import com.example.taskmanager.entity.Task;
 import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.exception.InvalidTaskException;
 import com.example.taskmanager.exception.ResourceNotFoundException;
 import com.example.taskmanager.repository.TaskRepository;
 import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +24,21 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Task> getAllTasks(TaskStatus status) {
-    return status == null ? taskRepository.findAll() : taskRepository.findByStatus(status);
+  public TaskPageResponse getAllTasks(TaskStatus status, int page, int size) {
+    if (page < 0) {
+      throw new InvalidTaskException("El parámetro page no puede ser negativo.");
+    }
+    if (size <= 0) {
+      throw new InvalidTaskException("El parámetro size debe ser mayor que 0.");
+    }
+
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Task> taskPage =
+        status == null
+            ? taskRepository.findAll(pageable)
+            : taskRepository.findByStatus(status, pageable);
+    return new TaskPageResponse(
+        taskPage.getContent(), taskPage.getTotalElements(), taskPage.getTotalPages(), page, size);
   }
 
   @Override
