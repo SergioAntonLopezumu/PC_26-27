@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,6 +31,13 @@ public class GlobalExceptionHandler {
     FieldError fieldError = ex.getBindingResult().getFieldError();
     String message =
         fieldError != null ? fieldError.getDefaultMessage() : "Datos de entrada inválidos.";
+    return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiError> handleTypeMismatch(
+      MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    String message = "Valor inválido para el parámetro: " + ex.getName() + ".";
     return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
   }
 

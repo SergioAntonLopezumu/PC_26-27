@@ -81,7 +81,7 @@ Base URL:
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/api/tasks` | Devuelve todas las tareas |
+| GET | `/api/tasks` | Devuelve todas las tareas; admite el filtro opcional `?status=PENDING`, `?status=IN_PROGRESS` o `?status=COMPLETED` |
 | GET | `/api/tasks/{id}` | Devuelve una tarea por su identificador |
 | POST | `/api/tasks` | Crea una nueva tarea |
 | PUT | `/api/tasks/{id}` | Actualiza una tarea existente |
@@ -105,6 +105,12 @@ curl -X POST http://localhost:8080/api/tasks \
 
 ```bash
 curl http://localhost:8080/api/tasks
+```
+
+Para listar únicamente las tareas en un estado:
+
+```bash
+curl "http://localhost:8080/api/tasks?status=PENDING"
 ```
 
 ## Validar el proyecto

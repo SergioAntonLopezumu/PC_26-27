@@ -1,6 +1,7 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.entity.Task;
+import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.exception.InvalidTaskException;
 import com.example.taskmanager.exception.ResourceNotFoundException;
 import com.example.taskmanager.repository.TaskRepository;
@@ -20,8 +21,8 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Task> getAllTasks() {
-    return taskRepository.findAll();
+  public List<Task> getAllTasks(TaskStatus status) {
+    return status == null ? taskRepository.findAll() : taskRepository.findByStatus(status);
   }
 
   @Override
