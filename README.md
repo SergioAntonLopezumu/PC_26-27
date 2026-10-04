@@ -1,4 +1,4 @@
-# Task Manager API
+# Task Manager APIAA
 
 API REST para gestionar tareas con Spring Boot, JPA y H2. Esta aplicación permite crear, listar, consultar, actualizar y eliminar tareas con validaciones básicas y almacenamiento en memoria.
 
