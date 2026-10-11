@@ -5,6 +5,8 @@ import com.example.taskmanager.entity.Task;
 import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +24,11 @@ public class TaskController {
   @GetMapping("/tasks")
   public TaskPageResponse getAllTasks(
       @RequestParam(required = false) TaskStatus status,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
-    return taskService.getAllTasks(status, page, size);
+    return taskService.getAllTasks(status, from, to, page, size);
   }
 
   @GetMapping("/tasks/{id}")

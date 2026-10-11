@@ -12,6 +12,7 @@ import com.example.taskmanager.dto.TaskPageResponse;
 import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.exception.InvalidTaskException;
 import com.example.taskmanager.service.TaskService;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ class TaskControllerTest {
   @MockBean private TaskService taskService;
 
   @Test
-  void getAllTasks_shouldPassNullWhenStatusIsOmitted() throws Exception {
-    when(taskService.getAllTasks(null, 0, 10))
+  void getAllTasks_shouldPassNullWhenNoFiltersAreProvided() throws Exception {
+    when(taskService.getAllTasks(null, null, null, 0, 10))
         .thenReturn(new TaskPageResponse(List.of(), 0, 0, 0, 10));
 
     mockMvc
@@ -38,12 +39,12 @@ class TaskControllerTest {
         .andExpect(jsonPath("$.totalElements").value(0))
         .andExpect(jsonPath("$.totalPages").value(0));
 
-    verify(taskService).getAllTasks(null, 0, 10);
+    verify(taskService).getAllTasks(null, null, null, 0, 10);
   }
 
   @Test
   void getAllTasks_shouldPassStatusToService() throws Exception {
-    when(taskService.getAllTasks(TaskStatus.COMPLETED, 0, 10))
+    when(taskService.getAllTasks(TaskStatus.COMPLETED, null, null, 0, 10))
         .thenReturn(new TaskPageResponse(List.of(), 0, 0, 0, 10));
 
     mockMvc
@@ -51,12 +52,26 @@ class TaskControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content").isArray());
 
-    verify(taskService).getAllTasks(TaskStatus.COMPLETED, 0, 10);
+    verify(taskService).getAllTasks(TaskStatus.COMPLETED, null, null, 0, 10);
+  }
+
+  @Test
+  void getAllTasks_shouldPassDateRangeToService() throws Exception {
+    LocalDate from = LocalDate.of(2026, 10, 1);
+    LocalDate to = LocalDate.of(2026, 10, 31);
+    when(taskService.getAllTasks(null, from, to, 0, 10))
+        .thenReturn(new TaskPageResponse(List.of(), 0, 0, 0, 10));
+
+    mockMvc
+        .perform(get("/api/tasks").param("from", "2026-10-01").param("to", "2026-10-31"))
+        .andExpect(status().isOk());
+
+    verify(taskService).getAllTasks(null, from, to, 0, 10);
   }
 
   @Test
   void getAllTasks_shouldPassPageAndSizeToService() throws Exception {
-    when(taskService.getAllTasks(null, 1, 5))
+    when(taskService.getAllTasks(null, null, null, 1, 5))
         .thenReturn(new TaskPageResponse(List.of(), 12, 3, 1, 5));
 
     mockMvc
@@ -65,7 +80,7 @@ class TaskControllerTest {
         .andExpect(jsonPath("$.totalElements").value(12))
         .andExpect(jsonPath("$.totalPages").value(3));
 
-    verify(taskService).getAllTasks(null, 1, 5);
+    verify(taskService).getAllTasks(null, null, null, 1, 5);
   }
 
   @Test
@@ -80,10 +95,21 @@ class TaskControllerTest {
   }
 
   @Test
+  void getAllTasks_shouldRejectInvalidDateParameter() throws Exception {
+    mockMvc
+        .perform(get("/api/tasks").param("from", "no-es-una-fecha"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.message").value("Valor inválido para el parámetro: from."));
+
+    verifyNoInteractions(taskService);
+  }
+
+  @Test
   void getAllTasks_shouldReturnBadRequestForInvalidPagination() throws Exception {
     doThrow(new InvalidTaskException("El parámetro page no puede ser negativo."))
         .when(taskService)
-        .getAllTasks(null, -1, 10);
+        .getAllTasks(null, null, null, -1, 10);
 
     mockMvc
         .perform(get("/api/tasks").param("page", "-1"))
