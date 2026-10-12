@@ -159,4 +159,28 @@ class TaskServiceTest {
 
     verify(taskRepository).deleteById(1L);
   }
+
+  @Test
+  void updateTask_shouldNotMutateExistingTaskWhenInputIsInvalid() {
+    Task invalid = new Task();
+    invalid.setTitle("   ");
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(validTask));
+
+    assertThrows(InvalidTaskException.class, () -> taskService.updateTask(1L, invalid));
+
+    assertEquals("Implementar API", validTask.getTitle());
+    assertEquals(TaskStatus.PENDING, validTask.getStatus());
+    assertEquals(TaskPriority.HIGH, validTask.getPriority());
+    assertEquals(LocalDate.now().plusDays(3), validTask.getDueDate());
+    verify(taskRepository, never()).save(any(Task.class));
+  }
+
+  @Test
+  void updateTask_shouldRejectNullInputWithDomainError() {
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(validTask));
+
+    assertThrows(InvalidTaskException.class, () -> taskService.updateTask(1L, null));
+    assertEquals("Implementar API", validTask.getTitle());
+    verify(taskRepository, never()).save(any(Task.class));
+  }
 }
