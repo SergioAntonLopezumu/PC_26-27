@@ -64,13 +64,13 @@ public class TaskServiceImpl implements TaskService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Tarea no encontrada con id: " + id));
 
+    validateTask(task);
     existingTask.setTitle(task.getTitle());
     existingTask.setDescription(task.getDescription());
     existingTask.setStatus(task.getStatus());
     existingTask.setPriority(task.getPriority());
     existingTask.setDueDate(task.getDueDate());
 
-    validateTask(existingTask);
     return taskRepository.save(existingTask);
   }
 
