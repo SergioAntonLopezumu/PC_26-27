@@ -1,6 +1,6 @@
 # Task Manager APIA
 
-API REST para gestionar tareas con Spring Boot, JPA y H2. Esta aplicación permite crear, listar, consultar, actualizar y eliminar tareas con validaciones básicas y almacenamiento en memoria.
+API REST para gestionar tareas con Spring Boot, JPA y PostgreSQL. Esta aplicación permite crear, listar, consultar, actualizar y eliminar tareas con validaciones básicas y persistencia en base de datos.
 
 ## Descripción
 
@@ -11,7 +11,9 @@ El proyecto consiste en un backend de gestión de tareas con los siguientes elem
 - Maven
 - Spring Web
 - Spring Data JPA
-- Hibernate + H2 Database
+- Hibernate + PostgreSQL
+- Spring Boot Actuator (`/actuator/health`)
+- Docker y Docker Compose
 - Validación de datos con Bean Validation
 - Endpoints REST bajo la ruta `/api`
 
@@ -35,7 +37,7 @@ cd Boletín1
 
 ## Configuración inicial
 
-El proyecto ya incluye la configuración necesaria para arrancar con H2 en memoria. La base de datos se crea automáticamente al iniciar la aplicación.
+La aplicación usa PostgreSQL. Las tablas las crea Hibernate al arrancar (`spring.jpa.hibernate.ddl-auto=update`). La forma recomendada de ejecutarla es con Docker (ver más abajo), que levanta la API y la base de datos juntas.
 
 ## Compilar el proyecto
 
@@ -150,19 +152,72 @@ mvn clean test
 mvn spring-boot:run
 ```
 
-## H2 Console
+## Ejecutar con Docker
 
-La aplicación incluye H2 Console habilitado para consultar la base de datos. Puedes acceder desde:
+Requisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker Compose).
 
-```text
-http://localhost:8080/h2-console
+1. Crea tu fichero de configuración local a partir de la plantilla (`.env` no se sube al repositorio):
+
+```bash
+cp .env.example .env
 ```
 
-Datos por defecto:
+2. Edita `.env` y cambia `POSTGRES_PASSWORD` por una contraseña propia. Variables disponibles:
 
-- URL JDBC: `jdbc:h2:mem:taskdb`
-- Usuario: `sa`
-- Contraseña: vacía
+| Variable | Descripción |
+| --- | --- |
+| `POSTGRES_DB` | Nombre de la base de datos |
+| `POSTGRES_USER` | Usuario de PostgreSQL |
+| `POSTGRES_PASSWORD` | Contraseña de PostgreSQL (obligatoria) |
+
+3. Construye la imagen y levanta la API y PostgreSQL:
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+4. Comprueba que está lista (ambos servicios en estado `healthy`):
+
+```bash
+curl http://localhost:8080/actuator/health
+curl http://localhost:8080/api/tasks
+```
+
+5. Para parar el stack:
+
+```bash
+docker compose down      # elimina contenedores y red; los datos se conservan
+docker compose down -v   # elimina además el volumen: se pierden los datos
+```
+
+> Si cambias las credenciales en `.env` con el volumen ya creado, PostgreSQL seguirá usando las antiguas. En desarrollo, ejecuta `docker compose down -v` y vuelve a levantar.
+
+### Construir solo la imagen
+
+El `Dockerfile` es multi-stage (compila con Maven y ejecuta con un JRE, con usuario sin privilegios):
+
+```bash
+docker build -t tareas-api:0.1 .
+```
+
+La imagen necesita una base de datos PostgreSQL accesible, por lo que no arranca sola: usa Compose.
+
+## Ejecutar con Dev Container
+
+Un dev container da el mismo entorno de desarrollo (JDK 21, Maven, Docker y extensiones de VS Code) sin instalar nada en local.
+
+Requisitos: Docker Desktop y VS Code con la extensión [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+
+1. Abre la carpeta del proyecto en VS Code.
+2. Ejecuta `Dev Containers: Reopen in Container` desde la paleta de comandos (`Ctrl+Shift+P`). La primera vez tarda porque construye el contenedor; el `postCreateCommand` crea `.env` desde `.env.example` si no existe y descarga las dependencias de Maven.
+3. Dentro del contenedor, abre una terminal y ejecuta:
+
+```bash
+docker compose up --build -d
+```
+
+4. Comprueba desde el navegador de tu máquina `http://127.0.0.1:8080/actuator/health` (los puertos 8080 y 5432 se reenvían automáticamente).
 
 ## Hooks de Git (Boletín 1)
 
@@ -204,6 +259,10 @@ git push origin feat/nueva-funcionalidad
 ```text
 Boletín1/
 ├── pom.xml
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+├── .devcontainer/
 ├── README.md
 ├── src/
 │   ├── main/
