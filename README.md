@@ -83,7 +83,7 @@ Base URL:
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/api/tasks` | Lista tareas paginadas; admite `?page=0&size=10` y el filtro opcional `?status=PENDING`, `?status=IN_PROGRESS` o `?status=COMPLETED` |
+| GET | `/api/tasks` | Lista tareas paginadas; admite `?page=0&size=10`, el filtro opcional por estado `?status=PENDING`, `?status=IN_PROGRESS` o `?status=COMPLETED` y el filtro por rango de fechas `?from=2026-10-01&to=2026-10-31` |
 | GET | `/api/tasks/{id}` | Devuelve una tarea por su identificador |
 | POST | `/api/tasks` | Crea una nueva tarea |
 | PUT | `/api/tasks/{id}` | Actualiza una tarea existente |
@@ -122,6 +122,20 @@ Para listar únicamente las tareas en un estado:
 ```bash
 curl "http://localhost:8080/api/tasks?status=PENDING"
 ```
+
+### Filtrar por rango de fechas límite
+
+Los parámetros `from` y `to` (formato ISO `YYYY-MM-DD`) permiten acotar las tareas
+cuya fecha límite (`dueDate`) cae dentro del rango, ambos inclusive. Son opcionales,
+se pueden usar por separado y se combinan con `status` y con la paginación:
+
+```bash
+curl "http://localhost:8080/api/tasks?from=2026-10-01&to=2026-10-31"
+curl "http://localhost:8080/api/tasks?from=2026-10-01"
+curl "http://localhost:8080/api/tasks?to=2026-10-31&status=PENDING&page=0&size=5"
+```
+
+Si `from` es posterior a `to`, la API responde `400 Bad Request`.
 
 ## Validar el proyecto
 
