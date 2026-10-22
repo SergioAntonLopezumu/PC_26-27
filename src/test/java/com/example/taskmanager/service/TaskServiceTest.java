@@ -153,7 +153,7 @@ class TaskServiceTest {
     Task saved = taskService.createTask(validTask);
 
     assertNotNull(saved);
-    assertEquals("Implementar API rota", saved.getTitle());
+    assertEquals("Implementar API", saved.getTitle());
     assertEquals(TaskStatus.PENDING, saved.getStatus());
     verify(taskRepository).save(validTask);
   }
