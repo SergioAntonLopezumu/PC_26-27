@@ -1,0 +1,61 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ai-review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generar revision de codigo con IA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OLLAMA_TOKEN: ${{ secrets.OLLAMA_API_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set +e
+          echo "Obteniendo diferencias del PR..."
+          DIFF_CONTENT=$(gh pr diff "$PR_NUMBER" | head -n 400)
+
+          if [ -z "$DIFF_CONTENT" ]; then
+            DIFF_CONTENT="No se han detectado cambios en el diff."
+          fi
+
+          ESCAPED_DIFF=$(echo "$DIFF_CONTENT" | jq -Rs .)
+          PROMPT="Eres un revisor de codigo experto. Resume en lenguaje natural y en espanol que cambios se introducen en este Pull Request a partir del siguiente diff:\n$ESCAPED_DIFF"
+          PAYLOAD=$(jq -n --arg prompt "$PROMPT" '{model: "llama3.2", prompt: $prompt, stream: false}')
+
+          echo "Llamando al servicio de IA..."
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.ollama.com/api/generate" \
+            -H "Authorization: Bearer $OLLAMA_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" --max-time 60)
+
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+
+          if [ "$HTTP_STATUS" -eq 200 ] && echo "$HTTP_BODY" | jq -e '.response' > /dev/null 2>&1; then
+            AI_COMMENT=$(echo "$HTTP_BODY" | jq -r '.response')
+            FINAL_BODY="### Resumen de cambios (IA)\n\n$AI_COMMENT"
+          else
+            echo "Error en la llamada a la IA (Status: $HTTP_STATUS)"
+            FINAL_BODY="La IA ha fallado"
+          fi
+
+          echo "Publicando comentario en el Pull Request #$PR_NUMBER..."
+          gh pr comment "$PR_NUMBER" --body "$FINAL_BODY"
