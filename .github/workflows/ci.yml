@@ -43,6 +43,7 @@ jobs:
           name: Resultados JUnit
           path: target/surefire-reports/*.xml
           reporter: java-junit
+          use-actions-summary: false
 
   package:
     needs: test
