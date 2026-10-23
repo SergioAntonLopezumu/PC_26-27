@@ -41,7 +41,7 @@ jobs:
           PAYLOAD=$(jq -n --arg prompt "$PROMPT" '{model: "llama3.2", prompt: $prompt, stream: false}')
 
           echo "Llamando al servicio de IA..."
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.ollama.com/api/generate" \
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://ollama.com/api/generate" \
             -H "Authorization: Bearer $OLLAMA_TOKEN" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" --max-time 60)
@@ -54,7 +54,7 @@ jobs:
             FINAL_BODY="### Resumen de cambios (IA)\n\n$AI_COMMENT"
           else
             echo "Error en la llamada a la IA (Status: $HTTP_STATUS)"
-            FINAL_BODY="La IA ha fallado"
+            FINAL_BODY="La IA ha fallado (Código HTTP: $HTTP_STATUS)"
           fi
 
           echo "Publicando comentario en el Pull Request #$PR_NUMBER..."
