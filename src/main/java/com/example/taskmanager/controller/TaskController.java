@@ -17,9 +17,9 @@ public class TaskController {
 
   private final TaskService taskService;
 
-    public TaskController(TaskService taskService) {
-  this.taskService = taskService;
-      }
+  public TaskController(TaskService taskService) {
+    this.taskService = taskService;
+  }
 
   @GetMapping("/tasks")
   public TaskPageResponse getAllTasks(
