@@ -1,5 +1,7 @@
 # Task Manager APIA
 
+[![CI Status](https://github.com/SergioAntonLopezumu/PC_26-27/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SergioAntonLopezumu/PC_26-27/actions/workflows/ci.yml)
+
 API REST para gestionar tareas con Spring Boot, JPA y PostgreSQL. Esta aplicación permite crear, listar, consultar, actualizar y eliminar tareas con validaciones básicas y persistencia en base de datos.
 
 ## Descripción
