@@ -122,7 +122,6 @@ docs/
 
 Cada memoria conserva sus capturas en una subcarpeta propia porque los nombres se repiten entre boletines: `ParteA1.png` existe tanto en el Boletín 3 como en el 4 con contenido distinto. Si todas las imágenes compartieran `docs/`, unas sobrescribirían a otras. Por eso las rutas del Markdown se reescribieron de `ParteA1.png` a `boletin3/ParteA1.png` (o `boletin4/...` según el caso), de forma que el mismo fichero funciona igual al verlo en GitHub y en la web generada.
 
-No se conservaba una memoria del Boletín 1, así que la documentación publicada empieza en el Boletín 2.
 
 #### D.2. El script generador
 
@@ -228,11 +227,8 @@ GitHub Pages solo publica sitios de repositorios públicos en los planes gratuit
 
 Después del primer push hay que indicarle a GitHub de dónde sale el sitio: en **Settings → Pages**, en *Build and deployment*, se cambia **Source** de *Deploy from a branch* a **GitHub Actions**. No hace falta elegir rama ni carpeta: el workflow se encarga de subir el artefacto.
 
-> **Capturas pendientes.** `ParteD2.png` (workflow de Pages en verde) y `ParteD3.png` (Settings → Pages con Source: GitHub Actions) se añadirán tras el primer despliegue. Las referencias ya están preparadas en este fichero y se descomentarán cuando existan las imágenes.
 
-<!-- ![Workflow de Pages en verde](boletin5/ParteD2.png) -->
-
-<!-- ![Settings → Pages con Source: GitHub Actions](boletin5/ParteD3.png) -->
+![Settings → Pages con Source: GitHub Actions](boletin5/ParteD3.png)
 
 #### D.6. `docs/site/` fuera del repositorio
 
