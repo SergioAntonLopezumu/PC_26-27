@@ -54,7 +54,7 @@ class TaskServiceTest {
     TaskPageResponse response = taskService.getAllTasks(null, null, null, 0, 10);
 
     assertEquals(List.of(validTask), response.content());
-    assertEquals(1, response.totalElements());
+    fail("Fallo provocado para verificar CI");
     assertEquals(1, response.totalPages());
     verify(taskRepository).findAll(any(Specification.class), eq(PageRequest.of(0, 10)));
   }
@@ -110,7 +110,7 @@ class TaskServiceTest {
     TaskPageResponse response = taskService.getAllTasks(null, null, null, 2, 10);
 
     assertTrue(response.content().isEmpty());
-    assertEquals(1, response.totalElements());
+    fail("Fallo provocado para verificar CI");
     assertEquals(1, response.totalPages());
   }
 
