@@ -287,36 +287,8 @@ Se añadió el job `deploy` que depende de `publish`, se ejecuta únicamente en 
 #### G.4. Arquitectura y flujo completo de CD
 
 ##### Diagrama de Arquitectura 
-```mermaid
-flowchart TB
-    subgraph GitHub ["1. GitHub & Registro (Nube)"]
-        Repo["Repositorio Git"] -->|Push Tag vX.Y.Z| GA["GitHub Actions (release.yml)"]
-        GA -->|Job: publish| GHCR["GHCR Container Registry"]
-        GA -->|Job: deploy| Env["Entorno 'produccion'<br/>(Aprobación Manual)"]
-    end
+![Diagrama](boletin6/diagrama.png)
 
-    Env -->|Aprobación| Runner["Runner Autoalojado (Self-hosted)"]
-
-    subgraph Host ["2. Tu Ordenador / Anfitrión (WSL2)"]
-        Runner -->|Ejecuta| Ansible["Ansible Controller<br/>(Playbook + Vault)"]
-    end
-
-    subgraph Flota ["3. Flota de Servidores (Docker Compose)"]
-        direction LR
-        App1["app1 (:2223)<br/>tareas-api (vX.Y.Z)"]
-        App2["app2 (:2224)<br/>tareas-api (vX.Y.Z)"]
-        DB1["db1 (:2225)<br/>PostgreSQL 16"]
-    end
-
-    Ansible ==>|SSH deploy| App1
-    Ansible ==>|SSH deploy| App2
-    Ansible ==>|SSH deploy| DB1
-
-    GHCR -.->|Pull image| App1
-    GHCR -.->|Pull image| App2
-    App1 -.->|Red Host| DB1
-    App2 -.->|Red Host| DB1
-```
 
 ##### Pasos del flujo (desde `git push` hasta ejecución en la flota):
 
