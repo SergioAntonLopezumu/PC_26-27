@@ -267,16 +267,19 @@ Asimismo, se probó la actualización a una nueva versión (`version_app=1.1.0`)
 ### Parte G. Disparar el despliegue desde GitHub Actions (cierre CD)
 
 #### G.1. Registro del runner autoalojado
+
 Se configuró un runner self-hosted (`self-hosted`) en la máquina de desarrollo (WSL2 / entorno local) conectado al repositorio de GitHub mediante `config.sh` y ejecutándose con `./run.sh`, permitiendo que GitHub Actions ejecute comandos de Ansible contra los contenedores locales (`localhost:2223`, `2224`, `2225`).
 
 ![Runner autoalojado conectado en la terminal](boletin6/ParteG1.png)
 
 #### G.2. Entorno protegido y secretos
+
 Se creó el environment `produccion` en GitHub con un revisor requerido obligatorio (`Required reviewer`), y se configuró el secret `VAULT_PASS` con la contraseña maestra del Ansible Vault.
 
 ![Configuración del environment produccion y secretos](boletin6/ParteG2.png)
 
 #### G.3. Ampliación del workflow `release.yml`
+
 Se añadió el job `deploy` que depende de `publish`, se ejecuta únicamente en `self-hosted` ante etiquetas `vX.Y.Z`, requiere aprobación en el entorno `produccion`, instala la collection de Ansible y ejecuta el playbook inyectando la versión y la contraseña del vault de forma segura mediante un archivo temporal (`mktemp` / `trap`).
 
 ![Pipeline de GitHub Actions con espera de aprobación en produccion](boletin6/ParteG3.png)
@@ -284,38 +287,11 @@ Se añadió el job `deploy` que depende de `publish`, se ejecuta únicamente en 
 #### G.4. Arquitectura y flujo completo de CD
 
 ##### Diagrama de Arquitectura 
-```mermaid
-flowchart TB
-    subgraph GitHub ["1. GitHub & Registro (Nube)"]
-        Repo["Repositorio Git"] -->|Push Tag vX.Y.Z| GA["GitHub Actions (release.yml)"]
-        GA -->|Job: publish| GHCR["GHCR Container Registry"]
-        GA -->|Job: deploy| Env["Entorno 'produccion'<br/>(Aprobación Manual)"]
-    end
+![Diagrama](boletin6/diagrama.png)
 
-    Env -->|Aprobación| Runner["Runner Autoalojado (Self-hosted)"]
-
-    subgraph Host ["2. Tu Ordenador / Anfitrión (WSL2)"]
-        Runner -->|Ejecuta| Ansible["Ansible Controller<br/>(Playbook + Vault)"]
-    end
-
-    subgraph Flota ["3. Flota de Servidores (Docker Compose)"]
-        direction LR
-        App1["app1 (:2223)<br/>tareas-api (vX.Y.Z)"]
-        App2["app2 (:2224)<br/>tareas-api (vX.Y.Z)"]
-        DB1["db1 (:2225)<br/>PostgreSQL 16"]
-    end
-
-    Ansible ==>|SSH deploy| App1
-    Ansible ==>|SSH deploy| App2
-    Ansible ==>|SSH deploy| DB1
-
-    GHCR -.->|Pull image| App1
-    GHCR -.->|Pull image| App2
-    App1 -.->|Red Host| DB1
-    App2 -.->|Red Host| DB1
-```
 
 ##### Pasos del flujo (desde `git push` hasta ejecución en la flota):
+
 1. **Developer:** Ejecuta `git tag -a v1.0.0 -m "Release v1.0.0"` y `git push origin v1.0.0`.
 2. **GitHub Actions (`publish`):** Se activa el workflow `release.yml`. Compila la aplicación, genera los metadatos de Docker y sube la imagen `ghcr.io/sergioantonlopezumu/pc_26-27:1.0.0` a GHCR.
 3. **Pausa por Entorno Protegido:** El job `deploy` espera en el entorno `produccion` hasta que un revisor autorizado apruebe manualmente el despliegue en la interfaz de GitHub.
